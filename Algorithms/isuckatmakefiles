@@ -1,0 +1,19 @@
+CC = gcc
+CFLAGS = -Wall -std=c11
+
+test:main.o
+	$(CC) $(CFLAGS) p1.o p2.o main.o -o test
+
+main.o:p1.o p2.o
+	$(CC) $(CFLAGS) -c main.c -o main.o
+
+p1.o:
+	$(CC) $(CFLAGS) -c P1.c -o p1.o
+
+p2.o:
+	$(CC) $(CFLAGS) -c P12.c -o p2.o
+
+
+
+clean:
+	rm -rf test *.o
