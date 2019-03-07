@@ -31,11 +31,11 @@ int main(){
     strcpy(str[i],tempStr);
     i++;
   }
-  ftime(&t_start);
   printf("enter number for anagram to find\n");
   fgets(tempStr, sizeof(char)*1001, stdin);
   tempStr[strcspn(tempStr, "\n")] = 0;
 
+  ftime(&t_start);
   for(i=0;i<30000;i++){
     count += isAnagram(tempStr,str[i]);
   }
