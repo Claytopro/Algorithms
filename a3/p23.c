@@ -24,7 +24,7 @@ int main(){
   struct timeb t_start, t_end;
   //256 to represent ascii tables although could be smaller because we are only using A-Z and a-z
   int table[512];
-  int tableGood[512];
+  int tableGood[512] ={0};
   int timeElapsed;
   int i=0;
   int j=1;
@@ -56,44 +56,39 @@ int main(){
   len = strlen(searchStr);
   for(j=0;j<len;j++){
     if(isalpha(searchStr[j]) == 0){
-      printf(":%c:\n",searchStr[j] );
       printf("Invalid entry, can only contain the 52 upper and lower case letters only \n");
       return 1;
     }
   }
 
   ftime(&t_start);
-  printf("%c%c%c%c%c\n",str[5703],str[5704],str[5705],str[5706],str[5707] );
 
   createTable(searchStr,table,512);
   createSuffixtable(searchStr,tableGood,512);
-  for(k=0;k<len;k++){
-    printf("%d\n",tableGood[k] );
-  }
+  printf("sss\n" );
 
   j=len-1;
   k=len-1;
 
   while(j<i){
+
     k=len-1;
-    while(searchStr[k]==str[j] && k>=0){
+    while(k>=0 && searchStr[k]==str[j]){
           k--;
           j--;
       }
 
 
     if(k<0){
-      printf("match at %d\n",j+1 );
-      printf("%c %d\n",str[j], table[transfer]);
       count++;
-      transfer = str[j];
-      j += tableGood[0]+1;
+      j = j+ tableGood[0]+1;
     }else{
       transfer = str[j];
+      if(transfer<0 || transfer>511) transfer =0;
       j += max(tableGood[k],table[transfer]);
     }
 
-    //printf("%d\n",j );
+
   }
 
 
@@ -109,7 +104,7 @@ int main(){
   fclose(fp);
   return 1;
 }
-//creates table for bad character rule
+//creates table for bad character rule same as hoops
 void createTable(char*pattern,int shiftTable[],int shiftSize){
   int len=0;
   int i=0;

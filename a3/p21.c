@@ -71,7 +71,6 @@ int main(){
         t++;
         if(t==len){
           count++;
-          printf("found in %s\n",tempStr );
           t=0;
         }
       }else{
