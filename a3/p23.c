@@ -1,0 +1,175 @@
+/*
+By:Clayton Provan
+Assignement 3 part 2.2
+march 4th
+*/
+
+#include "stdio.h"
+#include "sys/timeb.h"
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
+const int maxString = 1000;
+
+void createSuffixtable(char*pattern,int shiftTable[],int shiftSize);
+void createTable(char*pattern,int shiftTable[],int shiftSize);
+int max (int x, int y);
+
+int main(){
+  FILE *fp;
+  char *searchStr  = malloc(sizeof(char)*maxString);
+  char *str;
+
+  struct timeb t_start, t_end;
+  //256 to represent ascii tables although could be smaller because we are only using A-Z and a-z
+  int table[512];
+  int tableGood[512];
+  int timeElapsed;
+  int i=0;
+  int j=1;
+  int k=0;
+  int len = 0;
+  int count =0;
+  int transfer=0;
+  char c;
+
+
+  fp=fopen("data_5.txt","r");
+  str =calloc(1000000,sizeof(char));
+  //read in all characters
+  while((c = fgetc(fp)) != EOF){
+    str[i] = c;
+    i++;
+    if(i == 1000000*j){
+      j++;
+      str =realloc(str,sizeof(char)*1000000*j);
+    }
+  }
+
+
+  printf("enter pattern to find\n");
+  fgets(searchStr, sizeof(char)*1001, stdin);
+  searchStr[strcspn(searchStr, "\n")] = 0;
+
+//checks for valid input from user
+  len = strlen(searchStr);
+  for(j=0;j<len;j++){
+    if(isalpha(searchStr[j]) == 0){
+      printf(":%c:\n",searchStr[j] );
+      printf("Invalid entry, can only contain the 52 upper and lower case letters only \n");
+      return 1;
+    }
+  }
+
+  ftime(&t_start);
+  printf("%c%c%c%c%c\n",str[5703],str[5704],str[5705],str[5706],str[5707] );
+
+  createTable(searchStr,table,512);
+  createSuffixtable(searchStr,tableGood,512);
+  for(k=0;k<len;k++){
+    printf("%d\n",tableGood[k] );
+  }
+
+  j=len-1;
+  k=len-1;
+
+  while(j<i){
+    k=len-1;
+    while(searchStr[k]==str[j] && k>=0){
+          k--;
+          j--;
+      }
+
+
+    if(k<0){
+      printf("match at %d\n",j+1 );
+      printf("%c %d\n",str[j], table[transfer]);
+      count++;
+      transfer = str[j];
+      j += tableGood[0]+1;
+    }else{
+      transfer = str[j];
+      j += max(tableGood[k],table[transfer]);
+    }
+
+    //printf("%d\n",j );
+  }
+
+
+  ftime(&t_end);
+
+  timeElapsed = (int)(1000.0*(t_end.time - t_start.time) + (t_end.millitm - t_start.millitm));
+  printf("%s appears %d times\n",searchStr,count);
+  printf("Time Elapsed %d milliseconds\n",timeElapsed);
+
+
+  free(searchStr);
+  free(str);
+  fclose(fp);
+  return 1;
+}
+//creates table for bad character rule
+void createTable(char*pattern,int shiftTable[],int shiftSize){
+  int len=0;
+  int i=0;
+  int temp;
+
+  len = strlen(pattern);
+  //initlize all to maxshift size
+  for(i=0;i<shiftSize;i++){
+    shiftTable[i] = len;
+  }
+
+  //find last occurence of character and set shiftsize;
+  for(i=0;i<len-1; i++){
+    temp = pattern[i];
+    shiftTable[temp] = len-i-1;
+  }
+}
+
+
+void createSuffixtable(char*pattern,int shiftTable[],int shiftSize){
+    int patternLen;
+    int i=0;
+    int match,prefex,j;
+
+    patternLen = strlen(pattern);
+    prefex = patternLen-1;
+    for(i=patternLen;i>=0;i--){
+     match =1;
+      for(j=0;j<(patternLen-i+1);j++){
+        if(pattern[j] != pattern[i+j]){
+          match =0;
+        }
+      }
+      if(match ==1){
+        prefex = i+1;
+      }
+      shiftTable[i] = prefex + patternLen -1 -i;
+    }
+
+    for(i=0;i<patternLen-1;i++){
+
+      j=0;
+      while(pattern[i-j]==pattern[patternLen-1-j] && j<i){
+        j++;
+      }
+
+
+      if(pattern[i-j] != pattern[patternLen-1-j]){
+        shiftTable[patternLen-1-j] = patternLen-1-i+j;
+      }
+    }
+
+}
+
+//simple helper function for boyermoor algorithm
+int max (int x, int y){
+	if (x > y){
+		return x;
+	}
+	else{
+		return y;
+	}
+}
