@@ -10,12 +10,12 @@ march 4th
 #include <string.h>
 
 const int maxString = 1000;
-int isAnagram(char *toFind, char *toCompare);
+int isAnagrm(char *toFind, char *toCompare);
 
 void sortString(char *str,int l,int r);
 void merge(char *str, int l, int m, int r);
 
-int main(){
+int p12(){
   FILE *fp;
   char *tempStr = malloc(sizeof(char)*maxString);
   char *str[30000];
@@ -52,7 +52,7 @@ int main(){
 
   ftime(&t_start);
   for(i=0;i<30000;i++){
-    count += isAnagram(tempStr,str[i]);
+    count += isAnagrm(tempStr,str[i]);
   }
   ftime(&t_end);
   timeElapsed = (int)(1000.0*(t_end.time - t_start.time) + (t_end.millitm - t_start.millitm));
@@ -67,7 +67,7 @@ int main(){
 
 //if strings match then they are anagrams, because we sort strings first then search this will make it count additionally if the string is part of
 //list so cat will be anagram of cat
-int isAnagram(char *toFind, char *toCompare){
+int isAnagrm(char *toFind, char *toCompare){
   if(strcmp(toFind,toCompare) == 0) return 1;
   return 0;
 }

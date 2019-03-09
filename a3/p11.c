@@ -9,12 +9,11 @@ march 4th
 #include <stdlib.h>
 #include <string.h>
 
-const int maxString = 1000;
 int isAnagram(char *toFind, char *toCompare);
 
-int main(){
+int p11(){
   FILE *fp;
-  char *tempStr = malloc(sizeof(char)*maxString);
+  char *tempStr = malloc(sizeof(char)*1000);
   char *str[30000];
   struct timeb t_start, t_end;
   int timeElapsed;

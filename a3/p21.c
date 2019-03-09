@@ -10,13 +10,13 @@ march 4th
 #include <ctype.h>
 #include <string.h>
 
-const int maxString = 1000;
 
 
-int main(){
+
+int p21(){
   FILE *fp;
-  char *tempStr = malloc(sizeof(char)*maxString);
-  char *searchStr  = malloc(sizeof(char)*maxString);
+  char *tempStr = malloc(sizeof(char)*1000);
+  char *searchStr  = malloc(sizeof(char)*1000);
   char **str;
   struct timeb t_start, t_end;
   int timeElapsed;
@@ -26,6 +26,8 @@ int main(){
   int t=0;
   int len =0;
   int wordLen=0;
+
+  int shiftCount=0;
   int count =0;
 
 
@@ -38,7 +40,7 @@ int main(){
     strcpy(str[i],tempStr);
     i++;
   }
-  printf("%d\n",i );
+
   printf("enter pattern to find\n");
   fgets(searchStr, sizeof(char)*1001, stdin);
   searchStr[strcspn(searchStr, "\n")] = 0;
@@ -71,14 +73,23 @@ int main(){
         t++;
         if(t==len){
           count++;
+          //accounts for when pattern may be occuring right after itself,such as searchin for "ss" in "sss"
+          //we should get two occurences of "ss"
+          shiftCount++;
+          k=k-len+1;
           t=0;
         }
       }else{
         t=0;
         //if next index show it can be within word we dont increment;
-        if(searchStr[t] == tempStr[k]) k--;
+        //so we dont count shift either.
+        if(searchStr[t] == tempStr[k]) {
+          shiftCount--;
+          k--;
+        }
       }
       k++;
+      shiftCount++;
     }
   }
 
@@ -88,7 +99,7 @@ int main(){
   timeElapsed = (int)(1000.0*(t_end.time - t_start.time) + (t_end.millitm - t_start.millitm));
   printf("%s appears %d times\n",searchStr,count);
   printf("Time Elapsed %d milliseconds\n",timeElapsed);
-
+  printf("there are %d shifts \n",shiftCount );
 
   for(j=0;j<i;j++){
     free(str[j]);

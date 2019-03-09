@@ -10,15 +10,14 @@ march 4th
 #include <ctype.h>
 #include <string.h>
 
-const int maxString = 1000;
 
 void createSuffixtable(char*pattern,int shiftTable[],int shiftSize);
 void createTable(char*pattern,int shiftTable[],int shiftSize);
 int max (int x, int y);
 
-int main(){
+int p23(){
   FILE *fp;
-  char *searchStr  = malloc(sizeof(char)*maxString);
+  char *searchStr  = malloc(sizeof(char)*1000);
   char *str;
 
   struct timeb t_start, t_end;
@@ -33,6 +32,7 @@ int main(){
   int count =0;
   int transfer=0;
   char c;
+  int shiftCount=0;
 
 
   fp=fopen("data_5.txt","r");
@@ -65,7 +65,6 @@ int main(){
 
   createTable(searchStr,table,512);
   createSuffixtable(searchStr,tableGood,512);
-  printf("sss\n" );
 
   j=len-1;
   k=len-1;
@@ -82,9 +81,11 @@ int main(){
     if(k<0){
       count++;
       j = j+ tableGood[0]+1;
+      shiftCount++;
     }else{
       transfer = str[j];
       if(transfer<0 || transfer>511) transfer =0;
+      shiftCount++;
       j += max(tableGood[k],table[transfer]);
     }
 
@@ -97,6 +98,7 @@ int main(){
   timeElapsed = (int)(1000.0*(t_end.time - t_start.time) + (t_end.millitm - t_start.millitm));
   printf("%s appears %d times\n",searchStr,count);
   printf("Time Elapsed %d milliseconds\n",timeElapsed);
+  printf("there are %d shifts \n",shiftCount );
 
 
   free(searchStr);
@@ -131,6 +133,8 @@ void createSuffixtable(char*pattern,int shiftTable[],int shiftSize){
 
     patternLen = strlen(pattern);
     prefex = patternLen-1;
+
+    //find longest possible matches to any prefixes in the pattern
     for(i=patternLen;i>=0;i--){
      match =1;
       for(j=0;j<(patternLen-i+1);j++){
@@ -144,6 +148,8 @@ void createSuffixtable(char*pattern,int shiftTable[],int shiftSize){
       shiftTable[i] = prefex + patternLen -1 -i;
     }
 
+    //find section of pattern input that is unique. take smallest value because it
+    // may occur in middle of string or elsewhere and the smallest will tell us how far next possible match may be
     for(i=0;i<patternLen-1;i++){
 
       j=0;

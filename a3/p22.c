@@ -10,13 +10,11 @@ march 4th
 #include <ctype.h>
 #include <string.h>
 
-const int maxString = 1000;
+void createT(char*pattern,int shiftTable[],int shiftSize);
 
-void createTable(char*pattern,int shiftTable[],int shiftSize);
-
-int main(){
+int p22(){
   FILE *fp;
-  char *searchStr  = malloc(sizeof(char)*maxString);
+  char *searchStr  = malloc(sizeof(char)*1000);
   char *str;
 
   struct timeb t_start, t_end;
@@ -30,6 +28,7 @@ int main(){
   int count =0;
   int transfer;
   char c;
+  int shiftCount=0;
 
 
   fp=fopen("data_5.txt","r");
@@ -61,7 +60,7 @@ int main(){
 
   ftime(&t_start);
 
-  createTable(searchStr,table,512);
+  createT(searchStr,table,512);
   j=len-1;
 
   while(j<i){
@@ -78,8 +77,10 @@ int main(){
       transfer = str[j];
       //used when unicode values appear in text and will create negative index values.
       if(transfer>512 || transfer<0){
+        shiftCount++;
         j=j+len;
       }else{
+        shiftCount++;
         j=j+table[transfer];
       }
     }
@@ -91,6 +92,7 @@ int main(){
   timeElapsed = (int)(1000.0*(t_end.time - t_start.time) + (t_end.millitm - t_start.millitm));
   printf("%s appears %d times\n",searchStr,count);
   printf("Time Elapsed %d milliseconds\n",timeElapsed);
+  printf("there are %d shifts \n",shiftCount );
 
 
   free(searchStr);
@@ -99,7 +101,7 @@ int main(){
   return 1;
 }
 
-void createTable(char*pattern,int shiftTable[],int shiftSize){
+void createT(char*pattern,int shiftTable[],int shiftSize){
   int len=0;
   int i=0;
   int temp;
