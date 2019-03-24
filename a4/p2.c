@@ -9,9 +9,8 @@ march 24th
 #include <ctype.h>
 #include <string.h>
 
-/*
-struct used to represent a process,has some redundant properties but makes it easier to read and follow
-*/
+//Node *greedyCreateTree();
+
 typedef struct treeNode{
   char* key;
 
@@ -22,14 +21,11 @@ typedef struct treeNode{
   struct treeNode *right;
 } Node;
 
+static int myCompare(const void* a, const void* b);
 
-Node* createTREE(char ** keys,float** C,float** R, int i,int j);
 Node* initlizeNode(char* key);
 void findNode(char *toFind,Node *root);
-
-
-static int myCompare(const void* a, const void* b);
-const float MAX_VAL = 3.40282 * 1000000;
+Node* greedyCreateTree(char ** keys,float* R, int i,int j);
 
 int main(){
   FILE *fp;
@@ -39,22 +35,16 @@ int main(){
   char **keys;
   char *key;
 
-  Node *root ;
+  Node *root;
 
   int i=0;
   int j=0;
   int k=0;
-  int n=0;
-  int d=0;
-
-  float** C;
-  float** R;
-  float *freq;
   int count=0;
-  float minval=0;
-  float kMin =0;
-  int s =0;
-  float sum=0;
+
+  float *freq;
+
+
 
 
   fp=fopen("data_7.txt","r");
@@ -102,56 +92,9 @@ int main(){
   }
   free(str);
 
-  n=k;
 
-  C = malloc((n+2 )* sizeof(float*));
-  for(i = 0; i < n+2; i++)
-  {
-      C[i] = malloc((n+2)*sizeof(float));
-      for (j = 0; j < n+2; j++)
-      {
-        C[i][j] = 0;
-      }
-  }
-  R = malloc((n+2 ) * sizeof(float*));
-  for(i = 0; i < (n+2 ); i++)
-  {
-      R[i] = malloc((n+2 )*sizeof(float));
-      for (j = 0; j <(n+2 ); j++)
-      {
-        R[i][j] = 0;
-      }
-  }
+  root = greedyCreateTree(keys,freq,1,k);
 
-
-  //find optimatBST
-  for(i=1;i<=n;i++){
-    C[i][i-1] = 0;
-    C[i][i] = freq[i];
-    R[i][i] = i;
-  }
-  C[n+1][n] = 0;
-  for(d=1;d<=n-1;d++){
-    for(i=1;i<= n-d;i++){
-      j=i+d;
-      minval = MAX_VAL;
-      for(k=i;k<=j;k++){
-        if(C[i][k-1] + C[k+1][j] < minval){
-          minval = C[i][k-1] + C[k+1][j];
-          kMin =k;
-        }
-      }
-      R[i][j] = kMin;
-      sum = freq[i];
-      for(s= i+1;s<=j;s++){
-        sum = sum + freq[s];
-      }
-      C[i][j] = minval + sum;
-    }
-  }
-
-//make binary tree
-  root = createTREE(keys,C,R,1,n);
 
   printf("Enter a key: ");
   fgets(searchStr, sizeof(char)*1001, stdin);
@@ -164,44 +107,51 @@ int main(){
 */
   free(searchStr);
   free(freq);
-  for(j=0;j<n+2;j++){
-    free(C[j]);
-  }
-  free(C);
-
-  for(j=0;j<n+2;j++){
-    free(R[j]);
-  }
-  free(R);
   for(j=0;j<k;j++){
     free(keys[j]);
   }
   free(keys);
 
-fclose(fp);
 return 1;
 }
 
-static int myCompare(const void* a, const void* b){
-    return strcmp(*(const char**)a, *(const char**)b);
-}
 
-//create binary tree
-Node* createTREE(char ** keys,float** C,float** R, int i,int j){
+/*
+create a binary tree with the input by a greedy technique
+where we will select the key with the greatest freqency to be the sub node
+and then recursively find the next node in the array within the bounds
+to find the next greatest frequency and create the leafs.
+*/
+
+Node* greedyCreateTree(char ** keys,float* R, int i,int j){
   Node *temp =NULL;
-  float k;
-  if(i<=j){
-    k = R[i][j];
+  int a=0;
+  float max=0;
+  int maxIndex;
 
-    temp = initlizeNode(keys[(int)k]);
-    temp->val = C[i][j];
-    temp->left = createTREE(keys,C,R, i,k-1);
-    temp->right = createTREE(keys,C,R,k+1,j);
+  if(i<=j){
+    maxIndex =i;
+    max = R[i];
+    //find highest frequency
+    for(a=i+1;a<j;a++){
+      if(R[a] > max){
+        maxIndex=a;
+        max = R[a];
+      }
+    }
+
+    temp = initlizeNode(keys[maxIndex]);
+    temp->val =  R[maxIndex];
+
+
+    temp->left = greedyCreateTree(keys,R, i,maxIndex-1);
+    temp->right = greedyCreateTree(keys,R,maxIndex+1,j);
   }
   return temp;
 }
 
-//initilize nodes with given keys
+
+
 Node* initlizeNode(char* key){
   Node* temp = malloc(sizeof(Node));
   int len = strlen(key) +1;
@@ -221,13 +171,17 @@ void findNode(char *toFind,Node *root){
   }
   //node is found.
   if(strcmp(toFind,root->key)==0){
-    printf("compared with %s (%.3f),found\n",root->key,root->val);
+    printf("compared with %s (%.5f),found\n",root->key,root->val);
   }else if(strcmp(toFind,root->key)<0){
-    printf("compared with %s (%.3f),go left subtree\n",root->key,root->val);
+    printf("compared with %s (%.5f),go left subtree\n",root->key,root->val);
     findNode(toFind,root->left);
   }else if(strcmp(toFind,root->key)>0){
-    printf("compared with %s (%.3f),go right subtree\n",root->key,root->val);
+    printf("compared with %s (%.5f),go right subtree\n",root->key,root->val);
     findNode(toFind,root->right);
   }
 
+}
+
+static int myCompare(const void* a, const void* b){
+    return strcmp(*(const char**)a, *(const char**)b);
 }
